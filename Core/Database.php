@@ -1,0 +1,51 @@
+<?php
+
+namespace Core;
+
+use PDO;
+// Connect to the database, and execute a query
+class Database
+{
+  public $connection;
+  public $statement;
+
+  public function __construct($config, $username = 'root', $password = 'walabalo') //This contructor work is connecting only to the database.
+  {
+    $dsn = 'mysql:' . http_build_query($config, '', ';');
+
+    $this->connection = new PDO($dsn, $username, $password, [
+      PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
+  }
+
+  public function query($query, $params = []) //This method work for executing the query from the database details which is 'connection' (a instance property)
+  {
+
+
+    $this->statement = $this->connection->prepare($query);
+    $this->statement->execute($params);
+
+    return $this;
+  }
+
+  public function find()
+  {
+    return $this->statement->fetch();
+  }
+
+  public function get()
+  {
+    return $this->statement->fetchAll();
+  }
+
+  public function findOrFail()
+  {
+    $result = $this->find();
+
+    if (! $result) {
+      abort();
+    }
+
+    return $result;
+  }
+}

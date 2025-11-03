@@ -1,0 +1,10 @@
+{
+    "name": "hp/demo",
+    "authors": [
+        {
+            "name": "Jj Daulong",
+            "email": "daulong.jj@gmail.com"
+        }
+    ],
+    "require": {}
+}
