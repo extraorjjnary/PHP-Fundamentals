@@ -4,9 +4,9 @@ namespace Core;
 
 class Validator
 {
-  public static function email($value): bool
+  public static function email(string $value): bool
   {
-    return (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
+    return filter_var($value, FILTER_VALIDATE_EMAIL);
   }
 
   public static function string($value, $min = 1, $max = INF)
@@ -19,5 +19,10 @@ class Validator
   public static function checkChanges($oldContent, $newContent)
   {
     return $oldContent !== $newContent;
+  }
+
+  public static function greaterThan(int $value, int $greaterThan): bool
+  {
+    return $value > $greaterThan;
   }
 }

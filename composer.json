@@ -1,10 +1,26 @@
 {
-    "name": "hp/demo",
-    "authors": [
-        {
-            "name": "Jj Daulong",
-            "email": "daulong.jj@gmail.com"
-        }
-    ],
-    "require": {}
+  "name": "hp/demo",
+  "authors": [
+    {
+      "name": "Jj Daulong",
+      "email": "daulong.jj@gmail.com"
+    }
+  ],
+  "require": {
+    "illuminate/collections": "^12.36"
+  },
+  "autoload": {
+    "psr-4": {
+      "Core\\": "Core/",
+      "Http\\": "Http/"
+    }
+  },
+  "require-dev": {
+    "pestphp/pest": "^4.1"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
 }
