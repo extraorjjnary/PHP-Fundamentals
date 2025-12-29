@@ -3,8 +3,6 @@
 
 namespace Core;
 
-use Core\Middleware\Guest;
-use Core\Middleware\Auth;
 use Core\Middleware\Middleware;
 
 class Router
@@ -58,17 +56,74 @@ class Router
 
   public function route($uri, $method)
   {
+
     foreach ($this->routes as $route) {
-      if ($route['uri'] === $uri && $route['method'] === strtoupper($method)) {
+      if ($route['method'] !== strtoupper($method)) {
+        continue; // Skip or proceed to next iteration if mismatched and exit early if finding no match
+      }
 
+      $uri = trim($uri, '/'); // remove the '/' of example: /users => users
+      $routeUri = trim($route['uri'], '/');
+
+      $uriParts = explode('/', $uri); // seperate to each part in between to the seperator we use '/' and stored in an array
+      $routeParts = explode('/', $routeUri); // (2)
+
+
+
+
+      if (count($uriParts) !== count($routeParts)) {
+        continue; // skip if they have different number of parts
+      }
+
+      $params = [];
+      $isRouteMatch = true;
+
+      foreach ($routeParts as $index => $part) {
+        if (preg_match('/^{(.+)}$/', $part, $matches)) {
+          // This is the Dynamic part: which grab param name example:'user'
+          $paramName = $matches[1]; // Contains matched text only like we need e.g 'user' not full text '{user}'
+          $params[$paramName] = $uriParts[$index];
+        } else if ($part !== $uriParts[$index]) {
+          $isRouteMatch = false; // this part is if the static part is not match example users !== index
+          break;
+        }
+      }
+
+
+      if ($isRouteMatch) {
         Middleware::resolve($route['middleware']);
-
-
-        return require base_path('Http/controllers/' . $route['controller']);
+        return $this->handleRoute($route, $params);
       }
     }
-
     $this->abort();
+  }
+
+  private function handleRoute($route, $params)
+  {
+    if (strpos($route['controller'], '@') !== false) {
+      return $this->callController($route['controller'], $params);
+    }
+
+    return require base_path('Http/controllers/' . $route['controller']);
+  }
+
+  private function callController($controllerAction, $params = [])
+  {
+
+
+    $seperation = explode('@', $controllerAction);
+
+
+    $controllerName = 'Http\\controllers\\' . $seperation[0];
+    $methodName = $seperation[1];
+
+    $controller = new $controllerName();
+
+    if (empty($params)) {
+      $controller->$methodName();
+    } else {
+      $controller->$methodName($params['user']);
+    }
   }
 
   public function previousUrl()
