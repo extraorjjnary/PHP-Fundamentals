@@ -24,11 +24,13 @@
 // $router->post('/session', 'session/store.php')->only('guest');
 // $router->delete('/session', 'session/destroy.php')->only('auth');
 
-$router->get('/users', 'UsersController@index');
-$router->get('/users/create', 'UsersController@create');
-$router->post('/users', 'UsersController@store');
-$router->get('/users/{user}', 'UsersController@show');
+use Core\Router;
 
-$router->get('/users/{user}/edit', 'UsersController@edit');
-$router->patch('/users/{user}', 'UsersController@update');
-$router->delete('/users/{user}', 'UsersController@destroy');
+Router::get('/users', 'UsersController@index');
+Router::get('/users/create', 'UsersController@create');
+Router::post('/users', 'UsersController@store');
+Router::get('/users/{user}', 'UsersController@show');
+
+Router::get('/users/{user}/edit', 'UsersController@edit');
+Router::patch('/users/{user}', 'UsersController@update');
+Router::delete('/users/{user}', 'UsersController@destroy');

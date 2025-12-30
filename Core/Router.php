@@ -7,66 +7,67 @@ use Core\Middleware\Middleware;
 
 class Router
 {
-  protected $routes = [];
+  protected static $routes = [];
 
 
-  public function add($method, $uri, $controller)
+  public static function add($method, $uri, $controller)
   {
-    $this->routes[] = [
+    static::$routes[] = [
       'uri' => $uri,
       'controller' => $controller,
       'method' => $method,
       'middleware' => null
     ];
 
-    return $this;
+    return new static;
   }
 
-  public function get($uri, $controller)
+  public static function get($uri, $controller)
   {
-    return $this->add('GET', $uri, $controller);
+    return static::add('GET', $uri, $controller);
   }
 
-  public function post($uri, $controller)
+  public static function post($uri, $controller)
   {
-    return $this->add('POST', $uri, $controller);
+    return static::add('POST', $uri, $controller);
   }
 
-  public function delete($uri, $controller)
+  public static function delete($uri, $controller)
   {
-    return $this->add('DELETE', $uri, $controller);
+    return static::add('DELETE', $uri, $controller);
   }
 
-  public function patch($uri, $controller)
+  public static function patch($uri, $controller)
   {
-    return $this->add('PATCH', $uri, $controller);
+    return static::add('PATCH', $uri, $controller);
   }
 
-  public function put($uri, $controller)
+  public static function put($uri, $controller)
   {
-    return $this->add('PUT', $uri, $controller);
+    return static::add('PUT', $uri, $controller);
   }
 
-  public function only($key)
+  public static function only($key)
   {
-    $this->routes[array_key_last($this->routes)]['middleware'] = $key;
+    static::$routes[array_key_last(static::$routes)]['middleware'] = $key;
 
-    return $this;
+    return new static;
   }
 
-  public function route($uri, $method)
+  public static function route($uri, $method)
   {
 
-    foreach ($this->routes as $route) {
+    foreach (static::$routes as $route) {
       if ($route['method'] !== strtoupper($method)) {
         continue; // Skip or proceed to next iteration if mismatched and exit early if finding no match
       }
 
-      $uri = trim($uri, '/'); // remove the '/' of example: /users => users
+      $uri = trim($uri, '/'); // remove the '/' only at edges so the explode cannot return empty value in an array e.g: /users/5 → users/5
+
       $routeUri = trim($route['uri'], '/');
 
       $uriParts = explode('/', $uri); // seperate to each part in between to the seperator we use '/' and stored in an array
-      $routeParts = explode('/', $routeUri); // (2)
+      $routeParts = explode('/', $routeUri); // (2) 
 
 
 
@@ -92,30 +93,30 @@ class Router
 
       if ($isRouteMatch) {
         Middleware::resolve($route['middleware']);
-        return $this->handleRoute($route, $params);
+        return static::handleRoute($route, $params);
       }
     }
-    $this->abort();
+    static::abort();
   }
 
-  private function handleRoute($route, $params)
+  private static function handleRoute($route, $params)
   {
     if (strpos($route['controller'], '@') !== false) {
-      return $this->callController($route['controller'], $params);
+      return static::callController($route['controller'], $params);
     }
 
     return require base_path('Http/controllers/' . $route['controller']);
   }
 
-  private function callController($controllerAction, $params = [])
+  private static function callController($controllerAction, $params = [])
   {
 
 
-    $seperation = explode('@', $controllerAction);
+    $separation = explode('@', $controllerAction);
 
 
-    $controllerName = 'Http\\controllers\\' . $seperation[0];
-    $methodName = $seperation[1];
+    $controllerName = 'Http\\controllers\\' . $separation[0];
+    $methodName = $separation[1];
 
     $controller = new $controllerName();
 
@@ -132,7 +133,7 @@ class Router
   }
 
 
-  protected function abort($code = 404)
+  protected static function abort($code = 404)
   {
     http_response_code($code);
 
